@@ -1,0 +1,141 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'war'
+
+version = "1.0"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+	main {
+        java.srcDirs = ['src/main/java']
+    }
+ 	test {
+ 		java.srcDirs = ['src/test/java']
+ 	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.glassfish.jersey.core:jersey-server:2.23.2'
+	implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.23.2'
+	implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.23.2'
+	
+	implementation 'mysql:mysql-connector-java:5.0.8'
+	implementation 'org.eclipse.persistence:eclipselink:2.5.0'
+	
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.1'
+	implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.23.2'
+	implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.2'
+	
+	implementation 'org.jvnet.mimepull:mimepull:1.9.6'
+	
+	implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+	
+	testImplementation 'junit:junit:4.12'
+}
+
+test {
+    exclude '**/*'
+}
+
+war {
+	manifest {
+		attributes 'Implementation-Title': rootProject.name,
+				   'Implementation-Version': version
+	}
+	
+	archiveName = rootProject.name + '.war'  
+}
+
+ext.getResourcesPath = {
+	def FS = File.separator
+	
+	return projectDir.getAbsolutePath() + FS + 'src' + FS + 'main' + FS + 'resources'
+}
+
+task initDb(type: Exec) {
+	def FS = File.separator
+	def DB_USER_VAR = 'MYSQL_USER'
+	def DB_PASSWORD_VAR = 'MYSQL_PASSWORD'
+	def dbUser = System.getenv(DB_USER_VAR)
+	def dbPassword = System.getenv(DB_PASSWORD_VAR)
+	def dbName = rootProject.name + (project.hasProperty('mode') ? '-' + project.getProperty('mode') : '')
+	
+	if (!dbUser || !dbPassword) {
+		throw new InvalidUserDataException(
+			'Unable to read or empty database credentials provided by environment. Please make sure that ' +
+			DB_USER_VAR + 
+			' and ' + 
+			DB_PASSWORD_VAR + 
+			' env variables are configured.'
+		)
+	}
+	
+	def templateDbFile = rootProject.name + '-template.sql';
+	def targetDbFile = dbName + '.sql'
+	
+	copy {
+		from templateDbFile
+		into '.'
+		expand (DATABASE_NAME: dbName)
+		rename (templateDbFile, targetDbFile)
+	}
+
+	commandLine('mysql',  '-u' + dbUser, '-p' + dbPassword) 
+	doFirst {
+  		standardInput = new FileInputStream(file(targetDbFile))
+	}
+	
+	def metaInfDir = getResourcesPath() + FS + 'META-INF' + FS
+	
+	copy {
+		from metaInfDir + 'persistence-template.xml'
+		into metaInfDir
+		expand (MYSQL_USER: dbUser, MYSQL_PASSWORD: dbPassword)
+		rename ('persistence-template.xml','persistence.xml')
+	}
+}
+
+ext.getTomcatHomePath = {
+	def TOMCAT_HOME_VAR = 'TOMCAT_HOME'
+	def tomcatHome = System.getenv(TOMCAT_HOME_VAR)
+	
+	if (!tomcatHome) {
+		throw new InvalidUserDataException(
+			'Unable to read or empty tomcat home path provided by environment. Please make sure that ' +
+			TOMCAT_HOME_VAR +  
+			' env variable is configured.'
+		)
+	}
+	
+	return tomcatHome
+}
+
+// The tomcat deploy plugin for gradle is inconsistent, 
+// therefore we create our own deploy task
+task deploy(type: Copy) {
+	def FS = File.separator
+	
+	def buildLibsDir = projectDir.getAbsolutePath() + FS + 'build' + FS + 'libs'
+	def tomcatWebappsDir = getTomcatHomePath() + FS + 'webapps'
+		
+	from buildLibsDir + FS + war.archiveName
+	into tomcatWebappsDir
+}
+
+task removeProjectOnTomcat(type: Delete) {
+	def FS = File.separator
+	def tomcatWebappsDir = getTomcatHomePath() + FS + 'webapps'
+		
+	delete tomcatWebappsDir + FS + war.archiveName
+	delete tomcatWebappsDir + FS + rootProject.name
+}
+
+task redeploy(type: GradleBuild) {
+	tasks = ['removeProjectOnTomcat', 'build', 'deploy']
+}

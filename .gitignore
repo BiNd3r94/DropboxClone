@@ -1,0 +1,55 @@
+### Project ###
+# Should be generated during gradle setup processes with credentials
+src/**/META-INF/persistence.xml
+
+# Can be set from the template so everyone can use different configs locally
+src/**/resources/config.properties
+
+# Should be generated during gradle db setup
+*.sql
+!*-template.sql
+
+# Created during npm install etc.
+src/client/node_modules/**
+
+### Gradle ###
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+*target*
+*.jar
+*.war
+*.ear
+*.class
+
+# eclipse specific git ignore
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# Other
+/RemoteSystemsTempFiles/
+/bin/

@@ -1,0 +1,42 @@
+{
+  "name": "ws18-swa10-client",
+  "version": "1.0.0",
+  "description": "Frontend for the SWA semester project.",
+  "main": "index.jsx",
+  "repository": {
+    "type": "git",
+    "url": "git+http://cloud1.trackplus.com/gitlab/ws18/ws18-swa10.git"
+  },
+  "author": [
+    "Adrian Salmeron",
+    "Jan Binder",
+    "Osman Usluy"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.4",
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.14"
+  },
+  "dependencies": {
+    "bootstrap": "^4.2.1",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.6",
+    "react": "^16.7.0",
+    "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.7.0"
+  }
+}

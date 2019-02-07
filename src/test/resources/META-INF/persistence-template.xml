@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+    
+    <persistence-unit name="ws18-swa10-test" transaction-type="RESOURCE_LOCAL">
+    	<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <!-- <exclude-unlisted-classes>false</exclude-unlisted-classes> -->
+        <class>de.hse.ws18swa10.entity.User</class>
+        <class>de.hse.ws18swa10.entity.FileRequest</class>
+        <class>de.hse.ws18swa10.entity.FileShare</class>
+        <class>de.hse.ws18swa10.entity.Permission</class>
+        <class>de.hse.ws18swa10.entity.AuthToken</class>
+		<properties>
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ws18-swa10-test" />
+			<property name="javax.persistence.jdbc.user" value="${MYSQL_USER}" />
+			<property name="javax.persistence.jdbc.password" value="${MYSQL_PASSWORD}" />
+		</properties>
+    </persistence-unit>
+    
+</persistence>
